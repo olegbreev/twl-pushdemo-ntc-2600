@@ -303,19 +303,21 @@ public class MainActivity extends AppCompatActivity {
             holder[i] = builder;
         }
 
-        if (msgNumber % 2 == 0) {
-            notify(notificationIds[1], holder[1].build(), 0);
-        } else {
-            notify(notificationIds[0], holder[0].build(), 0);
-        }
-
+        // fix
         //if (msgNumber % 2 == 0) {
-        //    notify(notificationIds[0], holder[0].setSortKey("1").build(), 0);
-        //    notify(notificationIds[1], holder[1].setSortKey("2").build(), 0);
+        //    notify(notificationIds[1], holder[1].build(), 0);
         //} else {
-        //    notify(notificationIds[1], holder[1].setSortKey("1").build(), 0);
-        //    notify(notificationIds[0], holder[0].setSortKey("2").build(), 0);
+        //    notify(notificationIds[0], holder[0].build(), 0);
         //}
+
+        // unstable repro
+        if (msgNumber % 2 == 0) {
+            notify(notificationIds[0], holder[0].setSortKey("1").build(), 0);
+            notify(notificationIds[1], holder[1].setSortKey("2").build(), 0);
+        } else {
+            notify(notificationIds[1], holder[1].setSortKey("1").build(), 0);
+            notify(notificationIds[0], holder[0].setSortKey("2").build(), 0);
+        }
     }
 
     private void notify(int id, Notification notification, int delay) {
