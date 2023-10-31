@@ -186,7 +186,6 @@ public class MainActivity extends AppCompatActivity {
                 .setStyle(messagingStyle)
                 //.setContentIntent(contentIntent)
                 //.extend(wearableExtender)
-                //.setSortKey(String.valueOf(Long.MAX_VALUE - date))
                 .setCategory(NotificationCompat.CATEGORY_MESSAGE);
         builder.addPerson(personPhones[0]);
         builder.setChannelId(CHANNEL_ID);
@@ -259,10 +258,12 @@ public class MainActivity extends AppCompatActivity {
             NotificationCompat.MessagingStyle messagingStyle = new NotificationCompat.MessagingStyle(selfPerson);
             messagingStyle.setGroupConversation(false);
             int msgCount = 0;
+            long lastMessageTimestamp = 0L;
             for (int j = i; j < msgNumber; j = j + 2) {
                 msgCount++;
                 long delta = (msgNumber - 1 - j) * 60 * 1000L;
                 messagingStyle.addMessage(msgs[j] + " " + delta, date - delta, persons[j % 2]);
+                lastMessageTimestamp = (long) (date - delta);
             }
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
@@ -273,10 +274,10 @@ public class MainActivity extends AppCompatActivity {
                     .setNumber(msgCount)
                     .setColor(0xffffc200)
                     .setGroupSummary(false)
-                    .setWhen(date)
+                    .setWhen(lastMessageTimestamp)
                     .setShowWhen(true)
+                    .setSortKey(String.valueOf(Long.MAX_VALUE - lastMessageTimestamp))
                     .setStyle(messagingStyle)
-                    //.setSortKey(String.valueOf(Long.MAX_VALUE - date))
                     .setCategory(NotificationCompat.CATEGORY_MESSAGE);
             builder.addPerson(personPhones[i]);
             builder.setGroup(notificationGroup);
@@ -304,19 +305,19 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // fix
-        //if (msgNumber % 2 == 0) {
-        //    notify(notificationIds[1], holder[1].build(), 0);
-        //} else {
-        //    notify(notificationIds[0], holder[0].build(), 0);
-        //}
+        /*if (msgNumber % 2 == 0) {
+            notify(notificationIds[1], holder[1].build(), 0);
+        } else {
+            notify(notificationIds[0], holder[0].build(), 0);
+        }*/
 
         // unstable repro
         if (msgNumber % 2 == 0) {
-            notify(notificationIds[0], holder[0].setSortKey("1").build(), 0);
-            notify(notificationIds[1], holder[1].setSortKey("2").build(), 0);
+            notify(notificationIds[0], holder[0].build(), 0);
+            notify(notificationIds[1], holder[1].build(), 0);
         } else {
-            notify(notificationIds[1], holder[1].setSortKey("1").build(), 0);
-            notify(notificationIds[0], holder[0].setSortKey("2").build(), 0);
+            notify(notificationIds[1], holder[1].build(), 0);
+            notify(notificationIds[0], holder[0].build(), 0);
         }
     }
 
