@@ -69,6 +69,13 @@ public class MainActivity extends AppCompatActivity {
             "tel:+9996613953"
     };
 
+    private long msgTimestamps[] = {
+            0,
+            6000L,
+            10000L,
+            15000L
+    };
+
     public static volatile Handler applicationHandler;
     public static void runOnUIThread(Runnable runnable, long delay) {
         if (MainActivity.applicationHandler == null) {
@@ -97,6 +104,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        long date = System.currentTimeMillis();
+        for (int i = 0; i < msgTimestamps.length; i++) {
+            msgTimestamps[i] = date + msgTimestamps[i];
+        }
 
         applicationHandler = new Handler(this.getMainLooper());
 
@@ -168,7 +180,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void send1PushNotification() {
-        long date = System.currentTimeMillis();
         NotificationCompat.MessagingStyle messagingStyle = new NotificationCompat.MessagingStyle(persons[0]);
         messagingStyle.setGroupConversation(false);
         messagingStyle.addMessage(msgs[0], System.currentTimeMillis(), persons[0]);
@@ -181,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
                 .setNumber(1)
                 .setColor(0xffffc200)
                 .setGroupSummary(false)
-                .setWhen(date)
+                .setWhen(msgTimestamps[0])
                 .setShowWhen(true)
                 .setStyle(messagingStyle)
                 //.setContentIntent(contentIntent)
@@ -197,7 +208,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendSummaryNotification(int msgNumber) {
-        long date = System.currentTimeMillis();
         NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(this, CHANNEL_ID);
         mBuilder.setContentText(msgNumber + " messages from 2 chats");
         NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
@@ -215,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
                 .setGroup(notificationGroup)
                 .setGroupSummary(true)
                 .setShowWhen(true)
-                .setWhen(date)
+                .setWhen(msgTimestamps[msgNumber - 1])
                 .setColor(0xffffc200);
         mBuilder.setCategory(NotificationCompat.CATEGORY_MESSAGE);
         mBuilder.addPerson(personPhones[msgNumber % 2]);
@@ -247,7 +257,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void sendDialogsNotification(int msgNumber) {
-        long date = System.currentTimeMillis();
         Person.Builder personBuilder = new Person.Builder().setName("You");
         Person selfPerson = personBuilder.build();
 
@@ -261,9 +270,8 @@ public class MainActivity extends AppCompatActivity {
             long lastMessageTimestamp = 0L;
             for (int j = i; j < msgNumber; j = j + 2) {
                 msgCount++;
-                long delta = (msgNumber - 1 - j) * 60 * 1000L;
-                messagingStyle.addMessage(msgs[j] + " " + delta, date - delta, persons[j % 2]);
-                lastMessageTimestamp = (long) (date - delta);
+                messagingStyle.addMessage(msgs[j], msgTimestamps[j], persons[j % 2]);
+                lastMessageTimestamp = msgTimestamps[j];
             }
 
             NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
